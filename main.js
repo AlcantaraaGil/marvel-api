@@ -2,7 +2,39 @@ let input = document.getElementById("input-box");
 let button = document.getElementById("submit-button");
 let characterName = document.getElementById("characterName");
 let showContainer = document.getElementById("show-container");
+const suggestionsContainer = document.getElementById("suggestions-container");
 
+
+input.addEventListener("input", async (event) => {
+  const inputValue = event.target.value.trim();
+  suggestionsContainer.innerHTML = "";
+
+  if (inputValue.length >= 3) { // Realiza la búsqueda cuando se han ingresado al menos 3 caracteres
+      try {
+          const url = `https://gateway.marvel.com/v1/public/characters?ts=1&apikey=5be9c8724ac4248fb6ca6129211265e4&hash=0a6783b40c524d7ec5550eab82d1984e&nameStartsWith=${inputValue}`;
+          const response = await fetch(url);
+          const jsonData = await response.json();
+
+          // Muestra las sugerencias de personajes
+          jsonData.data.results.forEach((character) => {
+              const suggestionItem = document.createElement("div");
+              suggestionItem.textContent = character.name;
+              suggestionItem.classList.add("suggestion-item", "bg-gray-700", "text-white", "p-2", "border", "border-gray-300");
+
+              // Evento al hacer clic en una sugerencia
+              suggestionItem.addEventListener("click", () => {
+                  input.value = character.name;
+                  suggestionsContainer.innerHTML = "";
+                  findCharacter(character.name);
+              });
+
+              suggestionsContainer.appendChild(suggestionItem);
+          });
+      } catch (error) {
+          console.error(error);
+      }
+  }
+});
 
 
 
@@ -35,6 +67,7 @@ button.addEventListener("click", async (event) => {
   if (inputValue.length < 1) {
     alert("Input cannot be blank");
   } else {
+    suggestionsContainer.innerHTML = "";
     findCharacter(inputValue);
   }
 });
